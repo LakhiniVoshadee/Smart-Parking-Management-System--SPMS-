@@ -6,12 +6,13 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="api-gateway" />
         <module name="config-server" />
+        <module name="payment-server" />
         <module name="vehicle-service" />
+        <module name="user-server" />
+        <module name="api-gateway" />
         <module name="eureka-server" />
         <module name="parking-service" />
-        <module name="user-server" />
       </profile>
     </annotationProcessing>
   </component>
@@ -21,6 +22,7 @@
       <module name="config-server" options="-parameters" />
       <module name="eureka-server" options="-parameters" />
       <module name="parking-service" options="-parameters" />
+      <module name="payment-server" options="-parameters" />
       <module name="user-server" options="-parameters" />
       <module name="vehicle-service" options="-parameters" />
     </option>
