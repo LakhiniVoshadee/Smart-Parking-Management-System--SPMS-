@@ -1,0 +1,9 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /vehicle-service
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
