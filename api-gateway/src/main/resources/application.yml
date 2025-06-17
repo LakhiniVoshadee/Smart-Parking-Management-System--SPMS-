@@ -1,0 +1,35 @@
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+
+spring:
+  cloud:
+    loadbalancer:
+      rule: random
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://USER-SERVICE
+          #  uri: http://localhost:8081
+          predicates:
+            - Path=/user-service/**
+
+        - id:  parking-service
+          uri: lb://PARKING-SERVICE
+          #  uri: http://localhost:8081
+          predicates:
+            - Path=/parking-service/**
+
+        - id:  vehicle-service
+          uri: lb://VEHICLE-SERVICE
+          #  uri: http://localhost:3000
+          predicates:
+            - Path=/vehicle-service/**
+
+        - id: payment-service
+          uri:  lb://PAYMENT-SERVICE
+          #  uri: http://localhost:3000
+          predicates:
+            - Path=/payment-service/**
