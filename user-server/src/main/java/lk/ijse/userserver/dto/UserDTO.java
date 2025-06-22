@@ -1,6 +1,5 @@
 package lk.ijse.userserver.dto;
 
-
 import lk.ijse.userserver.enums.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Data;
