@@ -22,4 +22,10 @@ public interface ParkingService {
     List<ParkingSpaceDTO> filterParkingSpacesByZone(String zone);
 
     ParkingSpaceDTO updateLastUpdated(UUID parkingId, LocalDateTime lastUpdated);
+
+    ParkingSpaceDTO saveParkingSpace(ParkingSpaceDTO parkingSpaceDTO, UUID userId);
+
+    ParkingSpaceDTO updateParkingSpace(UUID parkingId, ParkingSpaceDTO parkingSpaceDTO, UUID userId);
+
+    void deleteParkingSpace(UUID parkingId, UUID userId);
 }

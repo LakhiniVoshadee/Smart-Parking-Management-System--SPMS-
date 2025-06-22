@@ -65,4 +65,21 @@ public class ParkingController {
         return space != null ? ResponseEntity.ok(space) : ResponseEntity.notFound().build();
     }
 
+    @PostMapping("/save")
+    public ResponseEntity<ParkingSpaceDTO> saveParkingSpace(@RequestBody ParkingSpaceDTO parkingSpaceDTO, @RequestParam UUID userId) {
+        ParkingSpaceDTO savedSpace = parkingService.saveParkingSpace(parkingSpaceDTO, userId);
+        return savedSpace != null ? ResponseEntity.ok(savedSpace) : ResponseEntity.badRequest().build();
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ParkingSpaceDTO> updateParkingSpace(@PathVariable UUID id, @RequestBody ParkingSpaceDTO parkingSpaceDTO, @RequestParam UUID userId) {
+        ParkingSpaceDTO updatedSpace = parkingService.updateParkingSpace(id, parkingSpaceDTO, userId);
+        return updatedSpace != null ? ResponseEntity.ok(updatedSpace) : ResponseEntity.badRequest().build();
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteParkingSpace(@PathVariable UUID id, @RequestParam UUID userId) {
+        parkingService.deleteParkingSpace(id, userId);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -30,7 +30,7 @@ public class ParkingSpace {
     private boolean isAvailable;
 
     @Column(name = "user_id")
-    private UUID userId; // Replaced email with userId
+    private UUID userId;
 
     @Column(name = "reserved_at")
     private LocalDateTime reservedAt;

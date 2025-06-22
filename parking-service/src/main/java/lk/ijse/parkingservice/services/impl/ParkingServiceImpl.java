@@ -2,7 +2,10 @@ package lk.ijse.parkingservice.services.impl;
 
 import lk.ijse.parkingservice.dto.ParkingSpaceDTO;
 import lk.ijse.parkingservice.entity.ParkingSpace;
+import lk.ijse.parkingservice.entity.User;
+import lk.ijse.parkingservice.enums.UserRole;
 import lk.ijse.parkingservice.repo.ParkingRepository;
+import lk.ijse.parkingservice.repo.UserRepository;
 import lk.ijse.parkingservice.services.ParkingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,9 @@ public class ParkingServiceImpl implements ParkingService {
 
     @Autowired
     private ParkingRepository parkingRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     // Convert entity to DTO
     private ParkingSpaceDTO toDTO(ParkingSpace parkingSpace) {
@@ -50,7 +56,6 @@ public class ParkingServiceImpl implements ParkingService {
         space.setLastUpdated(dto.getLastUpdated());
         return space;
     }
-
 
     @Override
     public List<ParkingSpaceDTO> getAllParkingSpaces() {
@@ -87,7 +92,7 @@ public class ParkingServiceImpl implements ParkingService {
                 ParkingSpace savedSpace = parkingRepository.save(space);
                 return toDTO(savedSpace);
             }
-            return null; // Reservation failed
+            return null;
         }).orElse(null);
     }
 
@@ -103,7 +108,7 @@ public class ParkingServiceImpl implements ParkingService {
                 ParkingSpace savedSpace = parkingRepository.save(space);
                 return toDTO(savedSpace);
             }
-            return null; // Release failed
+            return null;
         }).orElse(null);
     }
 
@@ -134,5 +139,74 @@ public class ParkingServiceImpl implements ParkingService {
             ParkingSpace savedSpace = parkingRepository.save(space);
             return toDTO(savedSpace);
         }).orElse(null);
+    }
+
+    @Override
+    public ParkingSpaceDTO saveParkingSpace(ParkingSpaceDTO parkingSpaceDTO, UUID userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty() || (!userOptional.get().getRole().equals(UserRole.ADMIN) && !userOptional.get().getRole().equals(UserRole.OWNER))) {
+            return null; // Unauthorized
+        }
+
+        if (parkingRepository.existsByLocation(parkingSpaceDTO.getLocation()) || parkingRepository.existsByLocationCode(parkingSpaceDTO.getLocationCode())) {
+            return null; // Location or code already exists
+        }
+
+        ParkingSpace parkingSpace = toEntity(parkingSpaceDTO);
+        parkingSpace.setAvailable(true);
+        parkingSpace.setUserId(userId);
+        parkingSpace.setLastUpdated(LocalDateTime.now());
+        ParkingSpace savedSpace = parkingRepository.save(parkingSpace);
+        return toDTO(savedSpace);
+    }
+
+    @Override
+    public ParkingSpaceDTO updateParkingSpace(UUID parkingId, ParkingSpaceDTO parkingSpaceDTO, UUID userId) {
+        Optional<ParkingSpace> optionalSpace = parkingRepository.findById(parkingId);
+        Optional<User> userOptional = userRepository.findById(userId);
+
+        if (optionalSpace.isEmpty() || userOptional.isEmpty()) {
+            return null; // Space or user not found
+        }
+
+        User user = userOptional.get();
+        ParkingSpace space = optionalSpace.get();
+        if (!user.getRole().equals(UserRole.ADMIN) && !space.getUserId().equals(userId)) {
+            return null; // Unauthorized
+        }
+
+        if (parkingSpaceDTO.getLocation() != null && !parkingSpaceDTO.getLocation().equals(space.getLocation()) && parkingRepository.existsByLocation(parkingSpaceDTO.getLocation())) {
+            return null; // New location already exists
+        }
+
+        if (parkingSpaceDTO.getLocationCode() != 0 && parkingSpaceDTO.getLocationCode() != space.getLocationCode() && parkingRepository.existsByLocationCode(parkingSpaceDTO.getLocationCode())) {
+            return null; // New location code already exists
+        }
+
+        space.setLocation(parkingSpaceDTO.getLocation() != null ? parkingSpaceDTO.getLocation() : space.getLocation());
+        space.setLocationCode(parkingSpaceDTO.getLocationCode() != 0 ? parkingSpaceDTO.getLocationCode() : space.getLocationCode());
+        space.setZone(parkingSpaceDTO.getZone() != null ? parkingSpaceDTO.getZone() : space.getZone());
+        space.setPricePerHour(parkingSpaceDTO.getPricePerHour() != null ? parkingSpaceDTO.getPricePerHour() : space.getPricePerHour());
+        space.setLastUpdated(LocalDateTime.now());
+        ParkingSpace updatedSpace = parkingRepository.save(space);
+        return toDTO(updatedSpace);
+    }
+
+    @Override
+    public void deleteParkingSpace(UUID parkingId, UUID userId) {
+        Optional<ParkingSpace> optionalSpace = parkingRepository.findById(parkingId);
+        Optional<User> userOptional = userRepository.findById(userId);
+
+        if (optionalSpace.isEmpty() || userOptional.isEmpty()) {
+            return; // Space or user not found
+        }
+
+        User user = userOptional.get();
+        ParkingSpace space = optionalSpace.get();
+        if (!user.getRole().equals(UserRole.ADMIN) && !space.getUserId().equals(userId)) {
+            return; // Unauthorized
+        }
+
+        parkingRepository.delete(space);
     }
 }

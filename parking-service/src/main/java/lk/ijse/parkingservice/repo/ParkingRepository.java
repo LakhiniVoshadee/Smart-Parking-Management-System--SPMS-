@@ -19,4 +19,8 @@ public interface ParkingRepository extends JpaRepository<ParkingSpace, UUID> {
     ParkingSpace findByLocationCode(int locationCode);
 
     List<ParkingSpace> findByUserId(UUID userId);
+
+    boolean existsByLocation(String location);
+
+    boolean existsByLocationCode(int locationCode);
 }

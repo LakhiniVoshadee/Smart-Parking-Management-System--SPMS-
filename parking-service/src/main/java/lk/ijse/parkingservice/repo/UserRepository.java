@@ -12,9 +12,7 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
 
-    // Find user by email for authentication
     Optional<User> findByEmail(String email);
 
-    // Find users by role (e.g., OWNER, ADMIN)
     List<User> findByRole(UserRole role);
 }
