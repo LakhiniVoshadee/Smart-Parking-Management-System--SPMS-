@@ -12,11 +12,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @Data
 @Entity
+@Table(name = "parking_space")
 public class ParkingSpace {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID parking_id;
+    @Column(name = "parking_id", updatable = false, nullable = false)
+    private UUID parkingId;
 
     @Column(nullable = false, unique = true)
     private String location;
@@ -27,18 +29,18 @@ public class ParkingSpace {
     @Column(nullable = false, columnDefinition = "BOOLEAN")
     private boolean isAvailable;
 
-    @Column(nullable = false)
+    @Column(name = "user_id")
+    private UUID userId; // Replaced email with userId
+
+    @Column(name = "reserved_at")
     private LocalDateTime reservedAt;
 
     @Column(nullable = false)
     private String zone;
 
-    @Column
+    @Column(name = "price_per_hour")
     private Double pricePerHour;
 
-    @Column(nullable = false)
-    private String email;
-
-    @Column
+    @Column(name = "last_updated")
     private LocalDateTime lastUpdated;
 }

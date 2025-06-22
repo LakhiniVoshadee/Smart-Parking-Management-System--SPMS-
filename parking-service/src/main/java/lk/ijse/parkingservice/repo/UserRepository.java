@@ -1,7 +1,7 @@
 package lk.ijse.parkingservice.repo;
 
+import lk.ijse.parkingservice.entity.User;
 import lk.ijse.parkingservice.enums.UserRole;
-import org.apache.catalina.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
