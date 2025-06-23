@@ -2,6 +2,7 @@ package lk.ijse.parkingservice.api;
 
 import lk.ijse.parkingservice.dto.ParkingSpaceDTO;
 import lk.ijse.parkingservice.services.ParkingService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,71 +16,67 @@ import java.util.UUID;
 public class ParkingController {
 
     @Autowired
-    private ParkingService parkingService;
+    private ParkingService parkingSpaceService;
 
     @GetMapping("/spaces")
-    public ResponseEntity<List<ParkingSpaceDTO>> getAllParkingSpaces() {
-        List<ParkingSpaceDTO> spaces = parkingService.getAllParkingSpaces();
-        return ResponseEntity.ok(spaces);
+    public ResponseEntity<List<ParkingSpaceDTO>> listAllParkingSpaces() {
+        return ResponseEntity.ok(parkingSpaceService.listAllParkingSpaces());
     }
 
-    @GetMapping("/available-spaces")
-    public ResponseEntity<List<ParkingSpaceDTO>> getAvailableParkingSpaces() {
-        List<ParkingSpaceDTO> spaces = parkingService.getAvailableParkingSpaces();
-        return ResponseEntity.ok(spaces);
-    }
-
-    @GetMapping("/space/{id}")
-    public ResponseEntity<ParkingSpaceDTO> getParkingSpaceById(@PathVariable UUID id) {
-        ParkingSpaceDTO space = parkingService.getParkingSpaceById(id);
-        return space != null ? ResponseEntity.ok(space) : ResponseEntity.notFound().build();
-    }
-
-    @PostMapping("/reserve/{id}")
-    public ResponseEntity<ParkingSpaceDTO> reserveParkingSpace(@PathVariable UUID id, @RequestParam UUID userId) {
-        ParkingSpaceDTO space = parkingService.reserveParkingSpace(id, userId);
+    @PostMapping("/reserve/{parkingId}")
+    public ResponseEntity<ParkingSpaceDTO> reserveParkingSpace(@PathVariable UUID parkingId, @RequestParam UUID userId) {
+        ParkingSpaceDTO space = parkingSpaceService.reserveParkingSpace(parkingId, userId);
         return space != null ? ResponseEntity.ok(space) : ResponseEntity.badRequest().build();
     }
 
-    @PostMapping("/release/{id}")
-    public ResponseEntity<ParkingSpaceDTO> releaseParkingSpace(@PathVariable UUID id) {
-        ParkingSpaceDTO space = parkingService.releaseParkingSpace(id);
+    @PostMapping("/release/{parkingId}")
+    public ResponseEntity<ParkingSpaceDTO> releaseParkingSpace(@PathVariable UUID parkingId) {
+        ParkingSpaceDTO space = parkingSpaceService.releaseParkingSpace(parkingId);
         return space != null ? ResponseEntity.ok(space) : ResponseEntity.badRequest().build();
     }
 
-    @PutMapping("/update-status/{id}")
-    public ResponseEntity<ParkingSpaceDTO> updateParkingStatus(@PathVariable UUID id, @RequestParam boolean isAvailable) {
-        ParkingSpaceDTO space = parkingService.updateParkingStatus(id, isAvailable);
-        return space != null ? ResponseEntity.ok(space) : ResponseEntity.notFound().build();
+    @PutMapping("/status/{parkingId}")
+    public ResponseEntity<ParkingSpaceDTO> updateStatus(@PathVariable UUID parkingId, @RequestParam boolean isAvailable) {
+        ParkingSpaceDTO space = parkingSpaceService.updateStatus(parkingId, isAvailable);
+        return space != null ? ResponseEntity.ok(space) : ResponseEntity.badRequest().build();
     }
 
-    @GetMapping("/filter-by-zone")
-    public ResponseEntity<List<ParkingSpaceDTO>> filterParkingSpacesByZone(@RequestParam String zone) {
-        List<ParkingSpaceDTO> spaces = parkingService.filterParkingSpacesByZone(zone);
-        return ResponseEntity.ok(spaces);
+    @GetMapping("/filter/location")
+    public ResponseEntity<List<ParkingSpaceDTO>> filterByLocation(@RequestParam String location) {
+        return ResponseEntity.ok(parkingSpaceService.filterByLocation(location));
     }
 
-    @PutMapping("/update-last-updated/{id}")
-    public ResponseEntity<ParkingSpaceDTO> updateLastUpdated(@PathVariable UUID id, @RequestParam LocalDateTime lastUpdated) {
-        ParkingSpaceDTO space = parkingService.updateLastUpdated(id, lastUpdated);
-        return space != null ? ResponseEntity.ok(space) : ResponseEntity.notFound().build();
+    @GetMapping("/filter/availability")
+    public ResponseEntity<List<ParkingSpaceDTO>> filterByAvailability(@RequestParam boolean isAvailable) {
+        return ResponseEntity.ok(parkingSpaceService.filterByAvailability(isAvailable));
     }
 
+    @GetMapping("/filter/zone")
+    public ResponseEntity<List<ParkingSpaceDTO>> filterByZone(@RequestParam String zone) {
+        return ResponseEntity.ok(parkingSpaceService.filterByZone(zone));
+    }
+
+    @PostMapping("/iot/{parkingId}")
+    public ResponseEntity<ParkingSpaceDTO> simulateIoTUpdate(@PathVariable UUID parkingId, @RequestParam boolean isAvailable,
+                                                             @RequestParam(required = false) LocalDateTime lastUpdated) {
+        ParkingSpaceDTO space = parkingSpaceService.simulateIoTUpdate(parkingId, isAvailable, lastUpdated);
+        return space != null ? ResponseEntity.ok(space) : ResponseEntity.badRequest().build();
+    }
     @PostMapping("/save")
     public ResponseEntity<ParkingSpaceDTO> saveParkingSpace(@RequestBody ParkingSpaceDTO parkingSpaceDTO, @RequestParam UUID userId) {
-        ParkingSpaceDTO savedSpace = parkingService.saveParkingSpace(parkingSpaceDTO, userId);
-        return savedSpace != null ? ResponseEntity.ok(savedSpace) : ResponseEntity.badRequest().build();
+        ParkingSpaceDTO space = parkingSpaceService.saveParkingSpace(parkingSpaceDTO, userId);
+        return space != null ? ResponseEntity.ok(space) : ResponseEntity.badRequest().build();
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<ParkingSpaceDTO> updateParkingSpace(@PathVariable UUID id, @RequestBody ParkingSpaceDTO parkingSpaceDTO, @RequestParam UUID userId) {
-        ParkingSpaceDTO updatedSpace = parkingService.updateParkingSpace(id, parkingSpaceDTO, userId);
-        return updatedSpace != null ? ResponseEntity.ok(updatedSpace) : ResponseEntity.badRequest().build();
+    @PutMapping("/update/{parkingId}")
+    public ResponseEntity<ParkingSpaceDTO> updateParkingSpace(@PathVariable UUID parkingId, @RequestBody ParkingSpaceDTO parkingSpaceDTO, @RequestParam UUID userId) {
+        ParkingSpaceDTO space = parkingSpaceService.updateParkingSpace(parkingId, parkingSpaceDTO, userId);
+        return space != null ? ResponseEntity.ok(space) : ResponseEntity.badRequest().build();
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteParkingSpace(@PathVariable UUID id, @RequestParam UUID userId) {
-        parkingService.deleteParkingSpace(id, userId);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/delete/{parkingId}")
+    public ResponseEntity<Void> deleteParkingSpace(@PathVariable UUID parkingId, @RequestParam UUID userId) {
+        parkingSpaceService.deleteParkingSpace(parkingId, userId);
+        return ResponseEntity.ok().build();
     }
 }

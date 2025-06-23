@@ -7,21 +7,21 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ParkingService {
-    List<ParkingSpaceDTO> getAllParkingSpaces();
-
-    List<ParkingSpaceDTO> getAvailableParkingSpaces();
-
-    ParkingSpaceDTO getParkingSpaceById(UUID parkingId);
+    List<ParkingSpaceDTO> listAllParkingSpaces();
 
     ParkingSpaceDTO reserveParkingSpace(UUID parkingId, UUID userId);
 
     ParkingSpaceDTO releaseParkingSpace(UUID parkingId);
 
-    ParkingSpaceDTO updateParkingStatus(UUID parkingId, boolean isAvailable);
+    ParkingSpaceDTO updateStatus(UUID parkingId, boolean isAvailable);
 
-    List<ParkingSpaceDTO> filterParkingSpacesByZone(String zone);
+    List<ParkingSpaceDTO> filterByLocation(String location);
 
-    ParkingSpaceDTO updateLastUpdated(UUID parkingId, LocalDateTime lastUpdated);
+    List<ParkingSpaceDTO> filterByAvailability(boolean isAvailable);
+
+    List<ParkingSpaceDTO> filterByZone(String zone);
+
+    ParkingSpaceDTO simulateIoTUpdate(UUID parkingId, boolean isAvailable, LocalDateTime lastUpdated);
 
     ParkingSpaceDTO saveParkingSpace(ParkingSpaceDTO parkingSpaceDTO, UUID userId);
 
