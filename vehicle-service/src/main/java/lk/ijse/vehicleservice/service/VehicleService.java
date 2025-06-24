@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.UUID;
 
 public interface VehicleService {
-    VehicleDTO registerVehicle(VehicleDTO vehicleDTO, UUID userId);
+    VehicleDTO registerVehicle(VehicleDTO vehicleDTO);
 
-    VehicleDTO updateVehicle(UUID vehicleId, VehicleDTO vehicleDTO, UUID userId);
+    VehicleDTO updateVehicle(UUID vehicleId, VehicleDTO vehicleDTO);
 
-    VehicleDTO retrieveVehicle(UUID vehicleId);
+    VehicleDTO getVehicleById(UUID vehicleId);
 
-    List<VehicleDTO> retrieveVehiclesByUser(UUID userId);
+    List<VehicleDTO> getVehiclesByUserId(UUID userId);
 
     VehicleDTO simulateEntry(UUID vehicleId, LocalDateTime entryTime);
 

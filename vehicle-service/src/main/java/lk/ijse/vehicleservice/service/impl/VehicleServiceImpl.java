@@ -46,70 +46,81 @@ public class VehicleServiceImpl implements VehicleService {
         vehicle.setUserId(dto.getUserId());
         vehicle.setEntryTime(dto.getEntryTime());
         vehicle.setExitTime(dto.getExitTime());
-        vehicle.setLastUpdated(dto.getLastUpdated() != null ? dto.getLastUpdated() : LocalDateTime.now());
+        vehicle.setLastUpdated(dto.getLastUpdated());
         return vehicle;
     }
 
     @Override
-    public VehicleDTO registerVehicle(VehicleDTO vehicleDTO, UUID userId) {
+    public VehicleDTO registerVehicle(VehicleDTO vehicleDTO) {
         if (vehicleRepository.findByVin(vehicleDTO.getVin()).isPresent() ||
                 vehicleRepository.findByLicensePlate(vehicleDTO.getLicensePlate()).isPresent()) {
-            return null; // VIN and license plate must be unique
+            return null; // Duplicate VIN or licensePlate
         }
         Vehicle vehicle = toEntity(vehicleDTO);
-        vehicle.setUserId(userId); // Link to user
         vehicle.setLastUpdated(LocalDateTime.now());
-        return toDTO(vehicleRepository.save(vehicle));
+        Vehicle savedVehicle = vehicleRepository.save(vehicle);
+        return toDTO(savedVehicle);
     }
 
     @Override
-    public VehicleDTO updateVehicle(UUID vehicleId, VehicleDTO vehicleDTO, UUID userId) {
+    public VehicleDTO updateVehicle(UUID vehicleId, VehicleDTO vehicleDTO) {
         Optional<Vehicle> vehicleOptional = vehicleRepository.findById(vehicleId);
-        return vehicleOptional.filter(vehicle -> vehicle.getUserId().equals(userId)).map(vehicle -> {
-            if ((vehicleDTO.getVin() != null && !vehicleDTO.getVin().equals(vehicle.getVin()) &&
-                    vehicleRepository.findByVin(vehicleDTO.getVin()).isPresent()) ||
-                    (vehicleDTO.getLicensePlate() != null && !vehicleDTO.getLicensePlate().equals(vehicle.getLicensePlate()) &&
-                            vehicleRepository.findByLicensePlate(vehicleDTO.getLicensePlate()).isPresent())) {
-                return null; // New VIN or license plate must be unique
+        return vehicleOptional.map(vehicle -> {
+            if (!vehicle.getVin().equals(vehicleDTO.getVin()) &&
+                    vehicleRepository.findByVin(vehicleDTO.getVin()).isPresent()) {
+                return null; // VIN already exists
             }
-            vehicle.setVin(vehicleDTO.getVin() != null ? vehicleDTO.getVin() : vehicle.getVin());
-            vehicle.setMake(vehicleDTO.getMake() != null ? vehicleDTO.getMake() : vehicle.getMake());
-            vehicle.setModel(vehicleDTO.getModel() != null ? vehicleDTO.getModel() : vehicle.getModel());
-            vehicle.setYear(vehicleDTO.getYear() != 0 ? vehicleDTO.getYear() : vehicle.getYear());
-            vehicle.setLicensePlate(vehicleDTO.getLicensePlate() != null ? vehicleDTO.getLicensePlate() : vehicle.getLicensePlate());
+            if (!vehicle.getLicensePlate().equals(vehicleDTO.getLicensePlate()) &&
+                    vehicleRepository.findByLicensePlate(vehicleDTO.getLicensePlate()).isPresent()) {
+                return null; // License plate already exists
+            }
+            vehicle.setVin(vehicleDTO.getVin());
+            vehicle.setMake(vehicleDTO.getMake());
+            vehicle.setModel(vehicleDTO.getModel());
+            vehicle.setYear(vehicleDTO.getYear());
+            vehicle.setLicensePlate(vehicleDTO.getLicensePlate());
+            // userId is not updated for simplicity
             vehicle.setLastUpdated(LocalDateTime.now());
             return toDTO(vehicleRepository.save(vehicle));
         }).orElse(null);
     }
 
     @Override
-    public VehicleDTO retrieveVehicle(UUID vehicleId) {
+    public VehicleDTO getVehicleById(UUID vehicleId) {
         return vehicleRepository.findById(vehicleId).map(this::toDTO).orElse(null);
     }
 
     @Override
-    public List<VehicleDTO> retrieveVehiclesByUser(UUID userId) {
-        return vehicleRepository.findByUserId(userId).stream().map(this::toDTO).collect(Collectors.toList());
+    public List<VehicleDTO> getVehiclesByUserId(UUID userId) {
+        return vehicleRepository.findByUserId(userId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public VehicleDTO simulateEntry(UUID vehicleId, LocalDateTime entryTime) {
         Optional<Vehicle> vehicleOptional = vehicleRepository.findById(vehicleId);
         return vehicleOptional.map(vehicle -> {
-            vehicle.setEntryTime(entryTime != null ? entryTime : LocalDateTime.now());
-            vehicle.setExitTime(null); // Clear exit time on entry
-            vehicle.setLastUpdated(LocalDateTime.now());
-            return toDTO(vehicleRepository.save(vehicle));
+            if (vehicle.getEntryTime() == null || vehicle.getExitTime() != null) {
+                vehicle.setEntryTime(entryTime);
+                vehicle.setExitTime(null);
+                vehicle.setLastUpdated(LocalDateTime.now());
+                return toDTO(vehicleRepository.save(vehicle));
+            }
+            return null; // Vehicle is currently parked
         }).orElse(null);
     }
 
     @Override
     public VehicleDTO simulateExit(UUID vehicleId, LocalDateTime exitTime) {
         Optional<Vehicle> vehicleOptional = vehicleRepository.findById(vehicleId);
-        return vehicleOptional.filter(vehicle -> vehicle.getEntryTime() != null && vehicle.getExitTime() == null).map(vehicle -> {
-            vehicle.setExitTime(exitTime != null ? exitTime : LocalDateTime.now());
-            vehicle.setLastUpdated(LocalDateTime.now());
-            return toDTO(vehicleRepository.save(vehicle));
+        return vehicleOptional.map(vehicle -> {
+            if (vehicle.getEntryTime() != null && vehicle.getExitTime() == null) {
+                vehicle.setExitTime(exitTime);
+                vehicle.setLastUpdated(LocalDateTime.now());
+                return toDTO(vehicleRepository.save(vehicle));
+            }
+            return null; // Vehicle is not currently parked
         }).orElse(null);
     }
 }

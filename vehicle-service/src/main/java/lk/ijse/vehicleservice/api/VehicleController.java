@@ -19,36 +19,37 @@ public class VehicleController {
     private VehicleService vehicleService;
 
     @PostMapping("/register")
-    public ResponseEntity<VehicleDTO> registerVehicle(@RequestBody VehicleDTO vehicleDTO, @RequestParam UUID userId) {
-        VehicleDTO vehicle = vehicleService.registerVehicle(vehicleDTO, userId);
-        return vehicle != null ? ResponseEntity.ok(vehicle) : ResponseEntity.badRequest().build();
+    public ResponseEntity<VehicleDTO> registerVehicle(@RequestBody VehicleDTO vehicleDTO) {
+        VehicleDTO registeredVehicle = vehicleService.registerVehicle(vehicleDTO);
+        return registeredVehicle != null ? ResponseEntity.ok(registeredVehicle) : ResponseEntity.badRequest().build();
     }
 
-    @PutMapping("/update/{vehicleId}")
-    public ResponseEntity<VehicleDTO> updateVehicle(@PathVariable UUID vehicleId, @RequestBody VehicleDTO vehicleDTO, @RequestParam UUID userId) {
-        VehicleDTO vehicle = vehicleService.updateVehicle(vehicleId, vehicleDTO, userId);
-        return vehicle != null ? ResponseEntity.ok(vehicle) : ResponseEntity.badRequest().build();
+    @PutMapping("/{vehicleId}")
+    public ResponseEntity<VehicleDTO> updateVehicle(@PathVariable UUID vehicleId, @RequestBody VehicleDTO vehicleDTO) {
+        VehicleDTO updatedVehicle = vehicleService.updateVehicle(vehicleId, vehicleDTO);
+        return updatedVehicle != null ? ResponseEntity.ok(updatedVehicle) : ResponseEntity.badRequest().build();
     }
 
-    @GetMapping("/retrieve/{vehicleId}")
-    public ResponseEntity<VehicleDTO> retrieveVehicle(@PathVariable UUID vehicleId) {
-        VehicleDTO vehicle = vehicleService.retrieveVehicle(vehicleId);
+    @GetMapping("/{vehicleId}")
+    public ResponseEntity<VehicleDTO> getVehicleById(@PathVariable UUID vehicleId) {
+        VehicleDTO vehicle = vehicleService.getVehicleById(vehicleId);
         return vehicle != null ? ResponseEntity.ok(vehicle) : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<VehicleDTO>> retrieveVehiclesByUser(@PathVariable UUID userId) {
-        return ResponseEntity.ok(vehicleService.retrieveVehiclesByUser(userId));
+    public ResponseEntity<List<VehicleDTO>> getVehiclesByUserId(@PathVariable UUID userId) {
+        List<VehicleDTO> vehicles = vehicleService.getVehiclesByUserId(userId);
+        return ResponseEntity.ok(vehicles);
     }
 
     @PostMapping("/entry/{vehicleId}")
-    public ResponseEntity<VehicleDTO> simulateEntry(@PathVariable UUID vehicleId, @RequestParam(required = false) LocalDateTime entryTime) {
+    public ResponseEntity<VehicleDTO> simulateEntry(@PathVariable UUID vehicleId, @RequestParam LocalDateTime entryTime) {
         VehicleDTO vehicle = vehicleService.simulateEntry(vehicleId, entryTime);
-        return vehicle != null ? ResponseEntity.ok(vehicle) : ResponseEntity.notFound().build();
+        return vehicle != null ? ResponseEntity.ok(vehicle) : ResponseEntity.badRequest().build();
     }
 
     @PostMapping("/exit/{vehicleId}")
-    public ResponseEntity<VehicleDTO> simulateExit(@PathVariable UUID vehicleId, @RequestParam(required = false) LocalDateTime exitTime) {
+    public ResponseEntity<VehicleDTO> simulateExit(@PathVariable UUID vehicleId, @RequestParam LocalDateTime exitTime) {
         VehicleDTO vehicle = vehicleService.simulateExit(vehicleId, exitTime);
         return vehicle != null ? ResponseEntity.ok(vehicle) : ResponseEntity.badRequest().build();
     }
